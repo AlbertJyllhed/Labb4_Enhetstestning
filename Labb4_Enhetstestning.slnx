@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Labb4_Enhetstestning.Tests/Labb4_Enhetstestning.Tests.csproj" />
+  <Project Path="Labb4_Enhetstestning/Labb4_Enhetstestning.csproj" />
+</Solution>
