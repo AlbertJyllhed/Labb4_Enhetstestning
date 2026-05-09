@@ -20,6 +20,18 @@
 
         public bool AddBook(Book book)
         {
+            // check if book parameter is null
+            if (book == null)
+            {
+                return false;
+            }
+
+            // check if book ISBN already exists in the list
+            if (SearchByISBN(book.ISBN) != null)
+            {
+                return false;
+            }
+
             books.Add(book);
             return true;
         }
@@ -27,7 +39,7 @@
         public bool RemoveBook(string isbn)
         {
             Book book = SearchByISBN(isbn);
-            if (book != null)
+            if (book != null && !book.IsBorrowed)
             {
                 books.Remove(book);
                 return true;
@@ -42,7 +54,7 @@
 
         public List<Book> SearchByTitle(string title)
         {
-            return books.Where(b => b.Title == title).ToList();
+            return books.Where(b => b.Title.Contains(title, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         public List<Book> SearchByAuthor(string author)
@@ -68,6 +80,7 @@
             if (book != null && book.IsBorrowed)
             {
                 book.IsBorrowed = false;
+                book.BorrowDate = null;
                 return true;
             }
             return false;
