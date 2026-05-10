@@ -1,0 +1,23 @@
+﻿1. [LibrarySystem/AddBook/23]:
+	kollar inte om en bok är null
+
+2. [LibrarySystem/AddBook/23]:
+	kollar inte om boken redan existerar i listan innan den läggs till
+
+3. [LibrarySystem/RemoveBook/42]:
+	kollar inte ifall en bok är utlånad innan den tas bort
+
+4. [LibrarySystem/SearchByTitle/57]:
+	sökningen är case-dependent
+
+5. [LibrarySystem/SearchByTitle/57]:
+	hittar inte delmatchningar, sökning måste vara exakt
+
+6. [LibrarySystem/ReturnBook/83]:
+	lånedatumet återställs aldrig
+
+7. [LibrarySystem/CalculateLateFee/104]:
+	värdena adderas istället för att multipliceras
+
+8. [LibrarySystem/CalculateLateFee/104]:
+	kollar inte att boken faktiskt är utlånad
