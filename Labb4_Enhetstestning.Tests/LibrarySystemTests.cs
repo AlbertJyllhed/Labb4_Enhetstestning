@@ -21,7 +21,7 @@ public class LibrarySystemTests
         string title, string author, string isbn, int publicationYear)
     {
         var book = new Book(title, author, isbn, publicationYear);
-        var result = _libSys.AddBook(book);
+        bool result = _libSys.AddBook(book);
         Assert.IsTrue(result);
         Assert.IsNotNull(_libSys.SearchByISBN(isbn)); // check if the book ended up in the list
     }
@@ -30,14 +30,14 @@ public class LibrarySystemTests
     public void AddBook_ShouldReturnFalse_WhenAddingDuplicate()
     {
         var book = new Book("1984", "George Orwell", "9780451524935", 1949); // exists in default list
-        var result = _libSys.AddBook(book);
+        bool result = _libSys.AddBook(book);
         Assert.IsFalse(result);
     }
 
     [TestMethod]
     public void AddBook_ShouldReturnFalse_WhenAddingNull()
     {
-        var result = _libSys.AddBook(null);
+        bool result = _libSys.AddBook(null);
         Assert.IsFalse(result);
     }
 
@@ -46,7 +46,7 @@ public class LibrarySystemTests
     public void RemoveBook_ShouldReturnTrue_BookShouldBeGone()
     {
         string isbn = "9780451524935"; // exists in the default list
-        var result = _libSys.RemoveBook(isbn);
+        bool result = _libSys.RemoveBook(isbn);
         Assert.IsTrue(result);
         Assert.IsNull(_libSys.SearchByISBN(isbn)); // check if the book is gone
     }
@@ -57,7 +57,7 @@ public class LibrarySystemTests
     [DataRow(null)]
     public void RemoveBook_ShouldReturnFalse_WhenBookNotFound(string isbn)
     {
-        var result = _libSys.RemoveBook(isbn);
+        bool result = _libSys.RemoveBook(isbn);
         Assert.IsFalse(result);
     }
 
@@ -66,7 +66,7 @@ public class LibrarySystemTests
     {
         string isbn = "9780451524935"; // exists in the default list
         _libSys.BorrowBook(isbn);
-        var result = _libSys.RemoveBook(isbn);
+        bool result = _libSys.RemoveBook(isbn);
         Assert.IsFalse(result);
     }
 
@@ -103,7 +103,7 @@ public class LibrarySystemTests
 
     // borrow tests -------------------------------------------------------------------------------
     [TestMethod]
-    public void BorrowBook_ShouldReturnTrue_WhenMarkedAsBorrowed()
+    public void BorrowBook_ShouldMarkBookAsBorrowed()
     {
         string isbn = "9780451524935"; // exists in the default list
         _libSys.BorrowBook(isbn);
@@ -116,7 +116,7 @@ public class LibrarySystemTests
     {
         string isbn = "9780451524935"; // exists in the default list
         _libSys.BorrowBook(isbn);
-        var result = _libSys.BorrowBook(isbn);
+        bool result = _libSys.BorrowBook(isbn);
         Assert.IsFalse(result);
     }
 
@@ -156,14 +156,60 @@ public class LibrarySystemTests
     public void ReturnBook_ShouldReturnFalse_WhenBookIsNotBorrowed()
     {
         string isbn = "9780451524935"; // exists in the default list
-        var result = _libSys.ReturnBook(isbn);
+        bool result = _libSys.ReturnBook(isbn);
         Assert.IsFalse(result);
     }
 
     // overdue tests ------------------------------------------------------------------------------
     [TestMethod]
-    public void CalculateLateFee_ShouldReturnPositiveDecimal_WhenBookIsLate()
+    public void IsBookOverdue_ShouldReturnTrue_WhenBookIsLate()
     {
+        string isbn = "9780451524935"; // exists in the default list
 
+        _libSys.BorrowBook(isbn);
+
+        var book = _libSys.SearchByISBN(isbn);
+        book.BorrowDate = DateTime.Now.AddDays(-31);
+
+        bool result = _libSys.IsBookOverdue(isbn, 30);
+        Assert.IsTrue(result);
+    }
+
+    [TestMethod]
+    public void IsBookOverdue_ShouldReturnFalse_WhenBookIsNotLate()
+    {
+        string isbn = "9780451524935"; // exists in the default list
+
+        _libSys.BorrowBook(isbn);
+
+        var book = _libSys.SearchByISBN(isbn);
+        book.BorrowDate = DateTime.Now.AddDays(-29);
+
+        bool result = _libSys.IsBookOverdue(isbn, 30);
+        Assert.IsFalse(result);
+    }
+
+    [TestMethod]
+    public void IsBookOverdue_ShouldReturnFalse_WhenBookIsNotBorrowed()
+    {
+        string isbn = "9780451524935"; // exists in the default list
+        bool result = _libSys.IsBookOverdue(isbn, 30);
+        Assert.IsFalse(result);
+    }
+
+    // late fee tests -----------------------------------------------------------------------------
+    [TestMethod]
+    [DataRow(10, 5.0)] // 10 * 0.5 = 5.0
+    [DataRow(1, 0.5)] // 1  * 0.5 = 0.5
+    [DataRow(0, 0.0)] // daysLate <= 0 should return 0
+    [DataRow(-1, 0.0)] // negative days should return 0
+    public void CalculateLateFee_ShouldReturnCorrectFee(int daysLate, double expectedFee)
+    {
+        string isbn = "9780451524935";
+        _libSys.BorrowBook(isbn);
+
+        var result = _libSys.CalculateLateFee(isbn, daysLate);
+
+        Assert.AreEqual((decimal)expectedFee, result);
     }
 }
